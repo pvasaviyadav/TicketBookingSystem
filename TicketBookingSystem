@@ -1,0 +1,78 @@
+package Vasavi;
+import java.util.Scanner;
+
+class TicketBookingSystem {
+	
+	    private volatile int availableTickets = 10; // Total available tickets
+
+	    // Synchronized method to book tickets
+	    public synchronized void bookTicket(String passengerName, int numberOfTickets) {
+	        if (numberOfTickets <= 0) {
+	            System.out.println("Invalid ticket number for " + passengerName);
+	            return;
+	        }
+
+	        System.out.println(passengerName + " is trying to book " + numberOfTickets + " ticket(s).");
+
+	        if (availableTickets >= numberOfTickets) {
+	            System.out.println("Booking successful for " + passengerName);
+	            availableTickets -= numberOfTickets;
+	            System.out.println("Remaining Tickets: " + availableTickets);
+	        } else {
+	            System.out.println("Booking failed for " + passengerName + ". Not enough tickets available.");
+	        }
+	    }
+	}
+
+	class User implements Runnable {
+	    private String name;
+	    private int numberOfTickets;
+	    private TicketBookingSystem ticketBookingSystem;
+
+	    public User(String name, int numberOfTickets, TicketBookingSystem ticketBookingSystem) {
+	        this.name = name;
+	        this.numberOfTickets = numberOfTickets;
+	        this.ticketBookingSystem = ticketBookingSystem;
+	    }
+
+	    @Override
+	    public void run() {
+	        try {
+	            ticketBookingSystem.bookTicket(name, numberOfTickets);
+	        } catch (Exception e) {
+	            System.out.println("An error occurred while booking for " + name + ": " + e.getMessage());
+	        }
+	    }
+	}
+
+	public class TicketBookingSystemMain {
+	    public static void main(String[] args) throws InterruptedException {
+	        TicketBookingSystem ticketBookingSystem = new TicketBookingSystem();
+
+	        // Creating users and assigning ticket booking tasks
+	        User user1 = new User("Alice", 3, ticketBookingSystem);
+	        User user2 = new User("Bob", 4, ticketBookingSystem);
+	        User user3 = new User("Charlie", 2, ticketBookingSystem);
+	        User user4 = new User("David", 5, ticketBookingSystem);
+
+	        // Creating threads for each user
+	        Thread t1 = new Thread(user1);
+	        Thread t2 = new Thread(user2);
+	        Thread t3 = new Thread(user3);
+	        Thread t4 = new Thread(user4);
+
+	        // Starting threads
+	        t1.start();
+	        t2.start();
+	        t3.start();
+	        t4.start();
+
+	        // Joining threads to wait for them to finish
+	        t1.join();
+	        t2.join();
+	        t3.join();
+	        t4.join();
+
+	        System.out.println("All bookings are processed.");
+	    }
+	}
